@@ -18,6 +18,7 @@ from utils import review_to_words, convert_and_pad
 def model_fn(model_dir):
     """Load the PyTorch model from the `model_dir` directory."""
     print("Loading model.")
+    print("model_dir: {}".format(model_dir))
 
     # First, load the parameters used to create the model.
     model_info = {}
@@ -71,7 +72,7 @@ def predict_fn(input_data, model):
     #         data_len - The length of the review
 
     review_words = review_to_words(input_data)
-    convert_data = convert_and_pad(word_dict, review_words)
+    convert_data = convert_and_pad(model.word_dict, review_words)
     
     data_X = convert_data[0]
     data_len = convert_data[1]
@@ -89,10 +90,9 @@ def predict_fn(input_data, model):
 
     # TODO: Compute the result of applying the model to the input data. The variable `result` should
     #       be a numpy array which contains a single integer which is either 1 or 0
-    with torch.no_grad():
-        result = model.forward(data)
-    
-    result = result.cpu()
-    result = np.round(result.numpy())
+        
+    y_hat = model(data).detach().cpu().numpy()
+    print(y_hat)
+    result = np.round(y_hat).astype(np.int)
 
     return result
